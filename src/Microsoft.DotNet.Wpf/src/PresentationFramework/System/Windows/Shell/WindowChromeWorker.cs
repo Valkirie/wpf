@@ -82,16 +82,9 @@ namespace Microsoft.Windows.Shell
                 return;
             }
 
-            if (_chromeInfo != null)
-            {
-                _chromeInfo.PropertyChangedThatRequiresRepaint -= _OnChromePropertyChangedThatRequiresRepaint;
-            }
-
+            _chromeInfo?.PropertyChangedThatRequiresRepaint -= _OnChromePropertyChangedThatRequiresRepaint;
             _chromeInfo = newChrome;
-            if (_chromeInfo != null)
-            {
-                _chromeInfo.PropertyChangedThatRequiresRepaint += _OnChromePropertyChangedThatRequiresRepaint;
-            }
+            _chromeInfo?.PropertyChangedThatRequiresRepaint += _OnChromePropertyChangedThatRequiresRepaint;
 
             _ApplyNewCustomChrome();
         }
@@ -189,10 +182,7 @@ namespace Microsoft.Windows.Shell
         {
             UnsubscribeWindowEvents();
 
-            if (_chromeInfo != null)
-            {
-                _chromeInfo.PropertyChangedThatRequiresRepaint -= _OnChromePropertyChangedThatRequiresRepaint;
-            }
+            _chromeInfo?.PropertyChangedThatRequiresRepaint -= _OnChromePropertyChangedThatRequiresRepaint;
 
             _RestoreStandardChromeState(true);
         }
@@ -1002,7 +992,11 @@ namespace Microsoft.Windows.Shell
                     cyBottomHeight = (int)Math.Ceiling(deviceGlassThickness.Bottom),
                 };
 
-                NativeMethods.DwmExtendFrameIntoClientArea(_hwnd, ref dwmMargin);
+                bool dwmApiResult = NativeMethods.DwmExtendFrameIntoClientArea(_hwnd, ref dwmMargin);
+                if(!dwmApiResult)
+                {
+                    _hwndSource.CompositionTarget.BackgroundColor = SystemColors.WindowColor;
+                }
             }
         }
 
